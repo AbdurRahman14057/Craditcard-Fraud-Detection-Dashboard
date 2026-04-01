@@ -10,24 +10,25 @@ st.set_page_config(page_title="Creditcard Fraud Detection", layout="wide")
 model = pickle.load(open("model.pkl", "rb"))
 
 # ---------------- LOGIN ----------------
-if "login" not in st.session_state:
-    st.session_state.login = False
+import pyrebase
+
+firebase = pyrebase.initialize_app(config)
+auth = firebase.auth()
 
 if not st.session_state.login:
-    st.title("Login Page")
+    st.title("🔐 Login")
 
-    col1, col2, col3 = st.columns([1,2,1])
+    email = st.text_input("Email")
+    password = st.text_input("Password", type="password")
 
-    with col2:
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-
-        if st.button("Login"):
-            if username == "admin" and password == "1234":
-                st.session_state.login = True
-                st.rerun()
-            else:
-                st.error("Invalid credentials")
+    if st.button("Login"):
+        try:
+            auth.sign_in_with_email_and_password(email, password)
+            st.session_state.login = True
+            st.success("Login Successful")
+            st.rerun()
+        except:
+            st.error("Invalid Login")
 
     st.stop()
 
